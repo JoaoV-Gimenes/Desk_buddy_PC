@@ -139,6 +139,7 @@ class BuddyApp(tk.Tk):
             self.status_ia_var.set("IA desativada")
             self.botao_ia.configure(text="Ativar IA")
 
-    if __name__ == "__main__":
-        app = BuddyApp()
-        app.mainloop()
+
+if __name__ == "__main__":
+    app = BuddyApp()
+    app.mainloop()
