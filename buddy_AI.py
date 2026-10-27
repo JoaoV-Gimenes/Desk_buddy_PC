@@ -14,6 +14,17 @@ class BuddyApp(tk.Tk):
 
         self.conexao_serial = None
         self.ia_ativa = False
+        self.status_var = tk.StringVar(
+            master=self,
+            value="Aguardando: diga Hi ESP"
+        )
+        self.status_label = ttk.Label(
+            self,
+            textvariable=self.status_var,
+            font=("Arial", 14, "bold")
+        )
+
+        self.status_label.pack(pady=10)
 
         self._criar_widgets()
         self._listar_portas()
@@ -105,6 +116,30 @@ class BuddyApp(tk.Tk):
                 f"Não foi possível abrir {porta}.\n\nFeche o Monitor Serial da Arduino IDE e tente novamente.\n\nDetalhes: {erro}",
             )
 
+    def processar_mensagem(self, linha):
+        print("MENSAGEM RECEBIDA:", repr(linha))
+
+        if "WakeWord Detected!" in linha:
+            self.status_var.set("Buddy está ouvindo!")
+            self._registrar("STATUS: Buddy está ouvindo!")
+
+
+        if "Command ID" in linha and "Detected!" in linha:
+
+            self.status_var.set("Comando reconhecido!")
+
+            self._registrar("STATUS: Comando reconhecido!")
+
+
+        if "Light On" in linha:
+
+            self.status_var.set("Comando: ligar luz")
+
+
+        if "Light Off" in linha:
+
+            self.status_var.set("Comando: desligar luz")
+
     def _ler_serial(self):
         if self.conexao_serial and self.conexao_serial.is_open:
             try:
@@ -112,6 +147,8 @@ class BuddyApp(tk.Tk):
                     linha = self.conexao_serial.readline().decode("utf-8", errors="replace").strip()
                     if linha:
                         self._registrar(linha)
+                        self.processar_mensagem(linha)
+
             except (serial.SerialException, OSError) as erro:
                 self._registrar(f"Erro ao ler a porta serial: {erro}")
                 try:
